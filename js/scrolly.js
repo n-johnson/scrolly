@@ -9,27 +9,23 @@
 /*
  *** Add semicolon before anon function. fucking jshint gets mad and it's annoying
  */
-
-var qqq, extoff; //Delete these 
 (function($, window, document, undefined) {
 
     var $window = $(window);
 
     var opts = { //Delete unles we need options
-        propertyName: "value"
+        scrollTime: 750 // # ms the scrolling animation will take
     };
 
     function Section(element, staticAbove, staticBelow) {
-        qqq = element.get(0); //Delete
         this.element = element.get(0);
         this.staticAbove = staticAbove;
         this.staticBelow = staticBelow;
-        this._top = this.element.offsetTop; /* Only accurate with no HTML changes. Need to make update method */
+        this._top = this.element.offsetTop;
         this._bottom = this._top + this.element.offsetHeight;
     }
 
     Section.prototype.update = function() {
-        console.log('udpate'.this._top);
         this._top = this.element.offsetTop;
     };
 
@@ -37,12 +33,9 @@ var qqq, extoff; //Delete these
         this.element = element;
         this.settings = $.extend({}, opts, options);
 
-        d = this.init(); // All
+        this.init();
     }
 
-    /**
-     * DELETE object references should be relative to $sidebar in order to support multiple sidebars on a single page.
-     */
     Scrolly.prototype.init = function() {
         this.$sidebar = $(this.element);
         this.$scrollPane = this.$sidebar.find('.scroll-pane');
@@ -58,13 +51,13 @@ var qqq, extoff; //Delete these
         var headerContainer = this.$sidebar.children('.section-headers.above'),
             footerContainer = this.$sidebar.children('.section-headers.below');
 
-        //Ideally should load new DOM elements to an array and append all at once
+        //Ideally should load new DOM elements to an array and append all at once. for n=10 @ initilization, not necessary
         this.sectionList = this.$sections.map(function(index, element) {
             var staticHeaderAbove = $(this)
                 .children('h3')
+                .attr('id', 'scrolly-pos-' + (index))
                 .clone()
-                .addClass('hidden')
-                .attr('id', 'scrolly-pos-' + (index));
+                .addClass('hidden');
             var staticHeaderBelow = staticHeaderAbove.clone();
 
             headerContainer.append(staticHeaderAbove);
@@ -73,33 +66,35 @@ var qqq, extoff; //Delete these
             return new Section($(this), staticHeaderAbove, staticHeaderBelow);
         }).get();
 
-        //Absolute div resized to prevent overlapping the scrollbar
+        //Absolute div resized to prevent headers from overlapping the scrollbar
         this.$sidebar.children('.section-headers').width(this.$sections.width());
 
         this.addListeners();
 
-        this.onScroll(); //Simulate scroll event to complete setup - sets the correct headers to be visible
-
-        extoff = this.offsetTracker; //DELETE
-        return this;
+        //Simulate scroll event to complete setup - sets the correct headers to be visible
+        this.onScroll();
     };
 
+
+    /**
+     * onStroll - Function called everytime the browswer emits a 'scroll' event
+     *   - For latest chrome + FF calling it every iteration shouldn't
+     *     be a problem, but for compatibility with older browsers who
+     *     may fire this event every single pixel scrolled, a rate limiting
+     *     function is needed.
+     */
     Scrolly.prototype.onScroll = function(scrollEvent) {
         var self = this;
         var scrollPos = this.$scrollPane.scrollTop();
 
+        var offsetAbove = self.offsetTracker.getOffset('above') * self.headerHeight,
+            offsetBelow = self.offsetTracker.getOffset('below') * self.headerHeight;
+
+        //Iterates over the sections and checks if they have scrolled off 
+        //or scrolled back in.
         self.sectionList.forEach(function(ele) {
             var deltaPostion = ele._top - scrollPos;
 
-            var offsetAbove = self.offsetTracker.getOffset('above') * self.headerHeight,
-                offsetBelow = self.offsetTracker.getOffset('below') * self.headerHeight;
-
-            console.log({
-                delta: deltaPostion,
-                above: offsetAbove,
-                below: offsetBelow
-            });
-            console.log(ele.element.className, 'snaptop', ele._top, scrollPos, deltaPostion, offsetAbove);
             if (deltaPostion <= (offsetAbove + 1)) { //Snap-top
                 self.toggleSnap(true, ele.staticAbove, 'above');
 
@@ -113,6 +108,33 @@ var qqq, extoff; //Delete these
         });
     };
 
+    /**
+     * toggleSnap - Snaps a section to the top/bottom when it is crossed by scrolling
+     * @param  {boolean} snapOn - true -> snap || false -> un-snap
+     * @param  {[Element]} element - jQuery element of the target section
+     * @param  {[string]} tag - 'above' or 'below'
+     */
+    Scrolly.prototype.toggleSnap = function(snapOn, element, tag) {
+        var start = !element.hasClass('hidden'); // Inverse because toggle on = hidden off
+
+        if (snapOn !== start) { //New snap event
+            this.offsetTracker.modify(tag, snapOn);
+
+            if (tag === 'above') { // A more optimal solution can be written
+                var offset = this.offsetTracker.getOffset('above');
+
+                this.$sidebar.find('.above > h3:nth-child(' + offset + ')').addClass('opened');
+                this.$sidebar.find('.above > h3:not(:nth-child(' + offset + '))').removeClass('opened');
+            }
+
+            element.toggleClass('hidden');
+            element.toggleClass('closed');
+        }
+    };
+
+    /**
+     * Wrapper where all event listeners are added. Called after plugin initialization
+     */
     Scrolly.prototype.addListeners = function() {
         var self = this;
 
@@ -127,20 +149,71 @@ var qqq, extoff; //Delete these
         });
 
         //3.) Clickable headers - all h3 elements within the div plugin executed on
+        /*  this.$sidebar.find('h3').click(function(e) {
+            var clickedElement = $(this),
+                parent = clickedElement.parent(),
+                sectionID = parseInt(clickedElement.get(0).id.replace('scrolly-pos-', ''), 10);
+
+            var opened = clickedElement.hasClass('open'),
+                closed = clickedElement.hasClass('closed');
+
+            if (opened && closed) { //This never *should* happen
+                clickedElement.removeClass('opened');
+            } else if (!opened && !closed) {
+                clickedElement.addClass('closed');
+            } else {
+                clickedElement.toggleClass('opened');
+                clickedElement.toggleClass('closed');
+            }
+
+            //self.scrollTo(sectionID, clickedElement);
+            console.log('click on ', sectionID);
+            console.log(parent);
+
+
+        });*/
+
         this.$sidebar.find('h3').click(function(e) {
             var clickedElement = $(this),
-                parent = clickedElement.parent();
+                parent = clickedElement.parent(),
+                sectionID = parseInt(clickedElement.get(0).id.replace('scrolly-pos-', ''), 10);
 
-            if (parent.is('.section')) {
-                console.log(clickedElement);
-                self.scrollTo(e.target.offsetTop);
+            console.log('click on ', sectionID);
+
+            if (parent.is('.section')) { // Visible & open -> only moves up
+                console.log('parent is .section');
+                var c = (self.$sections[sectionID + 1].offsetTop) - ((sectionID + 1) * self.headerHeight);
+                console.log('Middle:', sectionID, c);
+                self.scrollTo(c);
+
             } else if (parent.is('.section-headers.above')) {
+                console.log('parent is .section-headers.above', sectionID, self.offsetTracker.getOffset('above'));
+                if (sectionID + 1 === self.offsetTracker.getOffset('above')) { // The last open element docked on top
+                    self.scrollTo((self.$sections[sectionID + 1].offsetTop) - ((sectionID + 1) * self.headerHeight));
+                } else {
+                    self.scrollTo((self.$sections[sectionID].offsetTop) - (sectionID * self.headerHeight));
+                }
 
             } else if (parent.is('.section-headers.below')) {
-                var sectionID = parseInt(clickedElement.get(0).id.replace('scrolly-pos-', ''), 10);
-                self.scrollTo(self.$sections[sectionID].offsetTop);
-                /*console.log(sectionID);*/
+                console.log('parent is below', self.$scrollPane.scrollTop(), (self.$sections[sectionID].offsetTop));
+                console.log('section height: ', self.$sections.eq(sectionID).height());
+                console.log('screen height: ', self.visibleHeight);
+                /*var o = (self.$sections[sectionID].offsetTop) - (sectionID * self.headerHeight) + (self.visibleHeight - clickedElement.height());*/
+                var o = (self.$sections[sectionID].offsetTop) - (self.visibleHeight - self.$sections.eq(sectionID).height());
+                self.scrollTo(o);
             }
+
+
+            /*            if (elem > 0) {
+                scrollTo = sectionID + elem;
+                console.log('just bumping up the bottom a bit');
+            } else {
+                scrollTo = (self.$sections[sectionID].offsetTop) - (sectionID * this.headerHeight);
+                console.log(scrollTo, this.offsetTracker.getOffset('above'));
+                console.log('Headers above:', sectionID);
+            }*/
+
+
         });
 
         //4.) Pipe scroll wheel actions to .scroll-pane when hovering an absolute header section
@@ -148,16 +221,15 @@ var qqq, extoff; //Delete these
         //      - CSS pointer-events: none would do this too, but it also would prevent clicks,
         //        and you could click on what is underneath without realizing it
         this.$sidebar.find('.section-headers').bind('mousewheel DOMMouseScroll', function(e) {
-            console.log(e);
             e.preventDefault();
-            var scrollTo;
+            var targetPosition;
             if (e.type == 'mousewheel') {
-                scrollTo = (e.originalEvent.wheelDelta * -1);
+                targetPosition = (e.originalEvent.wheelDelta * -1);
             } else if (e.type == 'DOMMouseScroll') {
-                scrollTo = 40 * e.originalEvent.detail;
+                targetPosition = e.originalEvent.detail * 40;
             }
 
-            self.$scrollPane.scrollTop(scrollTo + self.$scrollPane.scrollTop());
+            self.$scrollPane.scrollTop(targetPosition + self.$scrollPane.scrollTop());
         });
 
         //5.) Watch the sidebar for any DOM changes which may effect the height - then
@@ -191,19 +263,6 @@ var qqq, extoff; //Delete these
         }
     };
 
-    Scrolly.prototype.toggleSnap = function(snapOn, element, tag) {
-        var start = !element.hasClass('hidden'); // Inverse because toggle on = hidden off
-
-        if (snapOn !== start) { //New snap event
-            element.toggleClass('hidden');
-            this.offsetTracker.modify(tag, snapOn);
-            /*console.log('offset test:', tag, this.offsetTracker.getOffset(tag));*/
-
-        } else {
-            //Ignore
-        }
-    };
-
     /**
      * Tracks how many headers are locked on top and on bottom without
      * having to search the DOM for it - rather it is called when a
@@ -226,29 +285,81 @@ var qqq, extoff; //Delete these
             if (typeof this._offset[tag] === 'undefined') {
                 this._offset[tag] = 0;
             }
-            console.log(tag, this._offset[tag]);
+            /*console.log(tag, this._offset[tag]);*/
             return this._offset[tag];
         },
         _offset: {}
     };
 
-    Scrolly.prototype.scrollTo = function(position) {
+    Scrolly.prototype.scrollTo = function(scrollTo) {
         var self = this;
-
-        var ss = position - (this.offsetTracker.getOffset('above') * this.headerHeight);
-        console.log(position, ss, this.offsetTracker.getOffset('above'));
 
         this.$scrollPane
             .animate({
-                scrollTop: ss,
-                duration: 3000,
-                step: function() {
-
+                scrollTop: scrollTo
+            }, {
+                duration: self.settings.scrollTime,
+                step: function(a) {
+                    //console.log('step', a);
                 }
             })
             .promise()
             .done(function() {});
     };
+
+    /*
+    Scrolly.prototype.scrollTo = function(sectionID, elem) {
+        var self = this,
+            scrollTo = 0;
+
+        if (elem > 0) {
+            scrollTo = sectionID + elem;
+            console.log('just bumping up the bottom a bit');
+        } else {
+            scrollTo = (self.$sections[sectionID].offsetTop) - (sectionID * this.headerHeight);
+            console.log(scrollTo, this.offsetTracker.getOffset('above'));
+            console.log('Headers above:', sectionID);
+        }
+
+        this.$scrollPane
+            .animate({
+                scrollTop: scrollTo
+            }, {
+                duration: 250,
+                step: function(a) {
+                    //console.log('step', a);
+                }
+            })
+            .promise()
+            .done(function() {});
+
+    };
+*/
+    /*Scrolly.prototype.scrollTo = function(position, scrollingDown) {
+        var self = this;
+
+        var fixedHeaders = this.offsetTracker.getOffset('above');
+        if (scrollingDown)
+            fixedHeaders--;
+
+        var ss = position - (fixedHeaders * this.headerHeight);
+
+        console.log(position, ss, this.offsetTracker.getOffset('above'));
+        console.log('Headers above:', fixedHeaders);
+
+
+        this.$scrollPane
+            .animate({
+                scrollTop: ss
+            }, {
+                duration: 250,
+                step: function(a) {
+                    //console.log('step', a);
+                }
+            })
+            .promise()
+            .done(function() {});
+    };*/
 
     Scrolly.prototype.updateWindowHeight = function(newHeight) {
         this.visibleHeight = newHeight;

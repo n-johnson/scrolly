@@ -14,8 +14,6 @@
     height: 100%;
 }
 
-.section {}
-
 .section > h3 {
     margin: 0;
     padding: 4px 10px;
@@ -23,16 +21,6 @@
     height: 20px;
     background: black;
     color: #fff;
-}
-
-.scroll-pane .section:last-child {
-    height: 100%;
-}
-
-.scroll-pane .section:last-child::after {
-    content: ' ';
-    height: inherit;
-    display: block;
 }
 
 .section-headers {
@@ -53,10 +41,6 @@
     display: none;
 }
 
-.closed > .body {
-    display: none;
-}
-
 .section .body {
     padding: 5px;
 }
@@ -68,3 +52,36 @@
 .below.section-headers {
     bottom: 0;
 }
+
+/*
+Elements snapped to the bottom are closed 100% of the time.
+Elements snapped to the top are closed except for the bottom-most element which is open
+  - However you cannot do 'h3:not(.hidden):last' in css, so javacript is required.
+Free floating elements are open 100% of the time -> closing one will move it to the top
+ */
+
+.above > h3.opened::before {
+    content: 'V ';
+}
+
+h3.closed::before {
+    content: '> ';
+}
+
+.section > h3::before {
+    content: 'V ';
+}
+
+/*
+Creates enough blank space after the final section so it can be scrolled to any arbitray position off screen
+ */
+/*.scroll-pane .section:last-child {
+    height: 100%;
+}
+
+.scroll-pane .section:last-child::after {
+    content: ' ';
+    height: inherit;
+    display: block;
+}
+*/
