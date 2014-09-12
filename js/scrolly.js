@@ -62,7 +62,6 @@
         this.onScroll();
     };
 
-
     /**
      * onScroll - Bound to browser 'scroll' event.
      *   - For latest chrome + FF calling it every iteration shouldn't
@@ -144,8 +143,14 @@
                 headerTotalAbove = 0,
                 sectionOffset = 0;
 
+            var sectionHeight = 0, //For final .section-headers.below, but also used for final section
+                extra = 0;
+
             if ((sectionID + 1) === self.$sections.length) { //Last section, when snapped to the top
-                sectionOffset = (self.$sections[sectionID].offsetTop);
+                sectionHeight = self.$sections.eq(sectionID).children('.body').height() + extra;
+                extra = self.headerHeight + 16 + 16; //Missing from calc below. Header + margins
+
+                sectionOffset = (self.$sections[sectionID].offsetTop) + sectionHeight + extra;
                 headerTotalAbove = ((sectionID) * self.headerHeight);
             } else {
                 sectionOffset = (self.$sections[sectionID + 1].offsetTop); //This would throw an exception for the final section
@@ -169,13 +174,8 @@
                  *     - As opposed to sending it all the way to the top closing everything in between
                  *     - Potentially should determine which behavior is better based on screen size.
                  */
-                var relativeOffset = self.$sections[sectionID].offsetTop,
-                    sectionHeight = self.$sections.eq(sectionID).height();
-
-                if ((sectionID + 1) === self.$sections.length) { //Ignoring the height of ::after
-                    var extra = self.headerHeight + 16 + 16; //Missing from calc below. Header + margins
-                    sectionHeight = self.$sections.eq(sectionID).children('.body').height() + extra;
-                }
+                var relativeOffset = self.$sections[sectionID].offsetTop;
+                sectionHeight = self.$sections.eq(sectionID).height();
 
                 return self.scrollTo(relativeOffset - (self.visibleHeight - sectionHeight));
             }

@@ -797,6 +797,14 @@ body .markdown-body
 <a name="user-content-picture" class="anchor" href="#picture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Picture</h3>
 
 <h2>
+<a name="user-content-features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Headers snap into place when they reach the top or bottom of screen instead of disappearing.</li>
+<li>They then can be clicked on to bring their content back into focus.</li>
+<li>Uses a MutationObserver to notify of DOM changes and readjusts absolute positioning afterwards.</li>
+<li>Exthensible. Well-commented code makes modification easy. I tried to use design patterns which wouldn't restrict future changes - large of small</li>
+</ul><h2>
 <a name="user-content-usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <p>Include <code>scrolly.js</code> and <code>scrolly.css</code> in your project.</p>
@@ -857,6 +865,13 @@ body .markdown-body
 <p>[In a future release this will be simplified scroll-pane could be automatically added by the plugin to simplify the base javascript.]</p>
 
 <h2>
+<a name="user-content-browser-compatibility" class="anchor" href="#browser-compatibility" aria-hidden="true"><span class="octicon octicon-link"></span></a>Browser Compatibility</h2>
+
+<p>Tested in latest Firefox and Chrome. Safari <em>should</em> work but I can't test it.</p>
+
+<p>IE11 is required for it to work 100% out of the box. Previous versions will work too, with the limit that it won't handle dynamically modified content. A polyfill exists to support IE9. Earlier compatibility is possible by writing a fallback that doesn't use "modern" methods to watch for DOM changes.</p>
+
+<h2>
 <a name="user-content-options" class="anchor" href="#options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Options</h2>
 
 <p>Plugin options can be set when the plugin is initialized by including an object as the function's argument.</p>
@@ -886,6 +901,12 @@ body .markdown-body
 
 <ul>
 <li>To fix just change it to calculate the height from all children - :after won't be a child.</li>
+</ul>
+</li>
+<li>Final div won't reopen after it closes (from a click, scrolling it works normal)
+
+<ul>
+<li>Instead of treating the final section special everywhere, let's just add an additional - hidden - section that simply serves as a reference point for where the final section ends. This will fix the issue with appending elements outside of the body class of the final section as well.</li>
 </ul>
 </li>
 </ul></article></body></html>
