@@ -1,13 +1,20 @@
+/* Scrolly.css | Author: Nathan Johnson <mail@njohnson.me> | Copyright 2014 All Rights Reserved */
+
+/**
+ * Default. This is the main container. 
+ */
 #sidebar {
     position: absolute;
-    width: 300px;
     background: #4b4b4b;
+    width: 300px;
     top: 0;
     right: 0;
     bottom: 0;
-    /*overflow: hidden;*/
 }
 
+/**
+ * Base - Will not function without
+ */
 .scroll-pane {
     overflow-y: scroll;
     overflow-x: hidden;
@@ -19,44 +26,20 @@
     position: absolute;
 }
 
-.section {}
-
 .section .body {
     padding-left: 10px;
     padding-right: 10px;
     color: #d6d6d6;
 }
 
-.section-headers > h3, .section > h3 {
+.content-header {
+    width: auto;
+    height: 20px;
     margin: 0;
     padding: 4px 10px;
     font-size: 14px;
-    height: 20px;
     background: #393939;
     color: #d6d6d6;
-    border-bottom: 1px solid #2c2c2c;
-    box-shadow: inset 0 1px 1px 0 rgba(200, 200, 200, 0.08);
-}
-
-.section > h3 {
-    /* Only when a section header is by itself in the middle of the page. */
-    border-top: 1px solid #2c2c2c;
-}
-
-.below > h3.hidden + h3.closed {
-    /* Topmost header on the bottom stack is also alone and missing it's top border without
-    Functions if `.below h3.closed::first-child` worked on a class-specific level */
-    border-top: 1px solid #2c2c2c;
-}
-
-.scroll-pane > div:first-of-type > h3 {
-    /* The very first section header. It never is displayed, but the bottom border had a tendancy to peak
-    out and give the first header a 2px bottom-border looking out of place.*/
-    border: none;
-}
-
-.section-headers > h3 {
-    width: auto;
 }
 
 .hidden {
@@ -71,28 +54,10 @@
     bottom: 0;
 }
 
-/*
-Elements snapped to the bottom are closed 100% of the time.
-Elements snapped to the top are closed except for the bottom-most element which is open
-  - However you cannot do 'h3:not(.hidden):last' in css, so javacript is required.
-Free floating elements are open 100% of the time -> closing one will move it to the top
- */
-
-.above > h3.opened::before {
-    content: 'V ';
-}
-
-h3.closed::before {
-    content: '> ';
-}
-
-.section > h3::before {
-    content: 'V ';
-}
-
-/*
-Creates enough blank space after the final section so it can be scrolled to any arbitray position off screen
-  - Without it, depending on screen size, you last few sections won't be able to snap to the top
+/**
+ * Creates enough blank space after the final section so
+ * it can be scrolled to any arbitray position off screen
+ *   - Without the last few sections won't snap to top
  */
 .scroll-pane .section:last-child {
     height: 100%;
@@ -102,4 +67,66 @@ Creates enough blank space after the final section so it can be scrolled to any 
     content: ' ';
     height: inherit;
     display: block;
+}
+
+/**
+ * Default design - Not required.
+ */
+.content-header {
+    font-family: Roboto, arial, sans-serif;
+    border-bottom: 1px solid #2c2c2c;
+    box-shadow: inset 0 1px 1px 0 rgba(200, 200, 200, 0.08);
+}
+
+.content-header:hover {
+    background: #414141;
+}
+
+.section > .content-header {
+    /* Only when a section header is by itself in the middle of the page. */
+    border-top: 1px solid #2c2c2c;
+}
+
+.below > .content-header.hidden + .content-header.closed {
+    /* Topmost header on the bottom stack is also alone and missing it's top border without. */
+    border-top: 1px solid #2c2c2c;
+}
+
+.scroll-pane > .section:first-of-type > .content-header {
+    /**
+     * Topmost header, will never be displayed.
+     * The bottom border had a tendancy to peak out
+     * and give the first header a 2px bottom-border
+     * looking out of place.
+     */
+    border: none;
+}
+
+/** #Control-Symbols
+ * Snapped Bottom: Closed 100% of the time
+ * Snapped Top: Closed except bottom-most element
+ * Free Floating: Open 100% of the time
+ */
+
+.content-header.closed::before {
+    font-family: FontAwesome;
+    content: '\f0fe';
+    /* Unicode font-awesome plus-box*/
+    padding-right: 5px;
+}
+
+.above > .opened::before, .section > .content-header::before {
+    font-family: FontAwesome;
+    content: '\f146';
+    /* Unicode font-awesome minus-box*/
+    padding-right: 5px;
+}
+
+/**
+ * Open is the dominant state. This ensures that
+ * won't change if the prior two rules were fliped around. 
+ */
+.closed + .opened::before {
+    content: '\f146';
+    /* Unicode font-awesome minus-box*/
 }

@@ -5,15 +5,12 @@
  * Copyright 2014 All Rights Reserved
  */
 
-
-/*
- *** Add semicolon before anon function. fucking jshint gets mad and it's annoying
- */
+; //jsBeautifer won't leave it on the next line. Still serves it's purpose here.
 (function($, window, document, undefined) {
 
     var $window = $(window);
 
-    var opts = { //Delete unles we need options
+    var opts = { //Defaults
         scrollTime: 750 // # ms the scrolling animation will take
     };
 
@@ -27,6 +24,7 @@
      * init - Called by plugin.
      */
     Scrolly.prototype.init = function() {
+        //Cache these jQuery DOM calls - frequently used.
         this.$sidebar = $(this.element);
         this.$scrollPane = this.$sidebar.find('.scroll-pane');
         this.$sections = this.$scrollPane.find('.section');
@@ -41,7 +39,6 @@
         var headerContainer = this.$sidebar.children('.section-headers.above'),
             footerContainer = this.$sidebar.children('.section-headers.below');
 
-        //Ideally should load new DOM elements to an array and append all at once. for n=10 @ initilization, not necessary
         this.sectionList = this.$sections.map(function(index, element) {
             var staticHeaderAbove = $(this)
                 .children('h3')
@@ -67,17 +64,18 @@
 
 
     /**
-     * onScroll - Function called everytime the browswer emits a 'scroll' event
+     * onScroll - Bound to browser 'scroll' event.
      *   - For latest chrome + FF calling it every iteration shouldn't
-     *     be a problem, but for compatibility with older browsers who
+     *     be a problem, but for compatibility with older browsers which
      *     may fire this event every single pixel scrolled, a rate limiting
      *     function is needed.
+     * @param {Event} scrollEvent - Not used. May use in the future
      */
     Scrolly.prototype.onScroll = function(scrollEvent) {
         var self = this;
-        var scrollPos = this.$scrollPane.scrollTop();
 
-        var offsetAbove = self.offsetTracker.getOffset('above') * self.headerHeight,
+        var scrollPos = this.$scrollPane.scrollTop(),
+            offsetAbove = self.offsetTracker.getOffset('above') * self.headerHeight,
             offsetBelow = self.offsetTracker.getOffset('below') * self.headerHeight;
 
         //Iterates over the sections and checks if they have scrolled off 
@@ -107,16 +105,16 @@
     Scrolly.prototype.toggleSnap = function(snapOn, element, tag) {
         var start = !element.hasClass('hidden'); // Inverse because toggle on = hidden off
 
-        if (snapOn !== start) { //New snap event
+        if (snapOn !== start) { //New snap
             this.offsetTracker.modify(tag, snapOn);
 
-            if (tag === 'above') { // A more optimal solution can be written
+            if (tag === 'above') { //The last & only last header snapped to the top should have the .opened class
                 var offset = this.offsetTracker.getOffset('above');
 
                 this.$sidebar.find('.above > h3:nth-child(' + offset + ')').addClass('opened');
                 this.$sidebar.find('.above > h3:not(:nth-child(' + offset + '))').removeClass('opened');
             }
-
+            //Toggle relevant classes for any new snap - above or below, add or remove.
             element.toggleClass('hidden');
             element.toggleClass('closed');
         }
@@ -139,24 +137,30 @@
         });
 
         //3.) Clickable headers - all h3 elements within the div plugin executed on
-        this.$sidebar.find('h3').click(function(e) {
+        this.$sidebar.find('h3.content-header').click(function(e) {
             var clickedElement = $(this),
                 parent = clickedElement.parent(),
-                sectionID = parseInt(clickedElement.get(0).id.replace('scrolly-pos-', ''), 10);
+                sectionID = parseInt(clickedElement.get(0).id.replace('scrolly-pos-', ''), 10),
+                headerTotalAbove = 0,
+                sectionOffset = 0;
 
-            var headerTotal = ((sectionID + 1) * self.headerHeight),
-                sectionOffset = (self.$sections[sectionID + 1].offsetTop);
+            if ((sectionID + 1) === self.$sections.length) { //Last section, when snapped to the top
+                sectionOffset = (self.$sections[sectionID].offsetTop);
+                headerTotalAbove = ((sectionID) * self.headerHeight);
+            } else {
+                sectionOffset = (self.$sections[sectionID + 1].offsetTop); //This would throw an exception for the final section
+                headerTotalAbove = ((sectionID + 1) * self.headerHeight);
+            }
 
             if (parent.is('.section')) { // Visible & open -> only moves up
-                return self.scrollTo(sectionOffset - headerTotal);
+                return self.scrollTo(sectionOffset - headerTotalAbove);
 
             } else if (parent.is('.section-headers.above')) { //Scroll to section on all except the last one - which is hidden
                 if (sectionID + 1 === self.offsetTracker.getOffset('above')) { // The last open element docked on top
-                    return self.scrollTo(sectionOffset - headerTotal);
+                    return self.scrollTo(sectionOffset - headerTotalAbove);
 
                 } else {
                     return self.scrollTo((self.$sections[sectionID].offsetTop) - (sectionID * self.headerHeight));
-
                 }
 
             } else if (parent.is('.section-headers.below')) {
@@ -168,6 +172,11 @@
                 var relativeOffset = self.$sections[sectionID].offsetTop,
                     sectionHeight = self.$sections.eq(sectionID).height();
 
+                if ((sectionID + 1) === self.$sections.length) { //Ignoring the height of ::after
+                    var extra = self.headerHeight + 16 + 16; //Missing from calc below. Header + margins
+                    sectionHeight = self.$sections.eq(sectionID).children('.body').height() + extra;
+                }
+                console.log(relativeOffset, sectionHeight);
                 return self.scrollTo(relativeOffset - (self.visibleHeight - sectionHeight));
 
             }
@@ -233,10 +242,7 @@
             .animate({
                 scrollTop: scrollTo
             }, {
-                duration: self.settings.scrollTime,
-                step: function(a) {
-                    //console.log('step', a);
-                }
+                duration: self.settings.scrollTime
             })
             .promise()
             .done(function() {});
