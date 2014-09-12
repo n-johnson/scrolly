@@ -62,3 +62,11 @@ $('#example').Scrolly({
 #### The Options
 
 `scrollTime` - How long (in milliseconds) the jQuery animation will take to scroll when a link is clicked. (DEFAULT = 750ms)
+
+## Known issues
+
+- Doesn't play 100% nice with pageUp/pageDown, it pages too much content at once to be useful.
+  - Bind the keypress event and intercept those keys. Instead move up or down just one section of content.
+- Pressing the Home key from the bottom results in the list being displayed out of order. Scrolling through corrects in automatically. I haven't looked into why this occurs.
+- The lowest section's header doesn't respond to clicks. I made a mistake I didn't catch when refactoring the click handler method.
+  - Easy fix, compare to previous source.

@@ -1,48 +1,66 @@
 #sidebar {
     position: absolute;
     width: 300px;
-    background: #999;
+    background: #4b4b4b;
     top: 0;
     right: 0;
     bottom: 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 .scroll-pane {
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
     width: 100%;
     height: 100%;
-}
-
-.section > h3 {
-    margin: 0;
-    padding: 4px 10px;
-    font-size: 14px;
-    height: 20px;
-    background: black;
-    color: #fff;
 }
 
 .section-headers {
     position: absolute;
 }
 
-.section-headers > h3 {
+.section {}
+
+.section .body {
+    padding-left: 10px;
+    padding-right: 10px;
+    color: #d6d6d6;
+}
+
+.section-headers > h3, .section > h3 {
     margin: 0;
     padding: 4px 10px;
     font-size: 14px;
     height: 20px;
-    background: black;
-    color: #fff;
+    background: #393939;
+    color: #d6d6d6;
+    border-bottom: 1px solid #2c2c2c;
+    box-shadow: inset 0 1px 1px 0 rgba(200, 200, 200, 0.08);
+}
+
+.section > h3 {
+    /* Only when a section header is by itself in the middle of the page. */
+    border-top: 1px solid #2c2c2c;
+}
+
+.below > h3.hidden + h3.closed {
+    /* Topmost header on the bottom stack is also alone and missing it's top border without
+    Functions if `.below h3.closed::first-child` worked on a class-specific level */
+    border-top: 1px solid #2c2c2c;
+}
+
+.scroll-pane > div:first-of-type > h3 {
+    /* The very first section header. It never is displayed, but the bottom border had a tendancy to peak
+    out and give the first header a 2px bottom-border looking out of place.*/
+    border: none;
+}
+
+.section-headers > h3 {
     width: auto;
 }
 
 .hidden {
     display: none;
-}
-
-.section .body {
-    padding: 5px;
 }
 
 .above.section-headers {

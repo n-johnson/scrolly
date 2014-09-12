@@ -85,7 +85,7 @@
         self.sectionList.forEach(function(ele) {
             var deltaPostion = ele._top - scrollPos;
 
-            if (deltaPostion <= (offsetAbove + 1)) { //Snap-top
+            if (deltaPostion <= (offsetAbove)) { //Snap-top
                 self.toggleSnap(true, ele.staticAbove, 'above');
 
             } else if (deltaPostion > (self.visibleHeight - offsetBelow)) { //Snap-bottom
