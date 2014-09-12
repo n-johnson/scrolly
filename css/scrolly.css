@@ -74,8 +74,9 @@ h3.closed::before {
 
 /*
 Creates enough blank space after the final section so it can be scrolled to any arbitray position off screen
+  - Without it, depending on screen size, you last few sections won't be able to snap to the top
  */
-/*.scroll-pane .section:last-child {
+.scroll-pane .section:last-child {
     height: 100%;
 }
 
@@ -84,4 +85,3 @@ Creates enough blank space after the final section so it can be scrolled to any 
     height: inherit;
     display: block;
 }
-*/
