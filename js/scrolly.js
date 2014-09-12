@@ -176,9 +176,8 @@
                     var extra = self.headerHeight + 16 + 16; //Missing from calc below. Header + margins
                     sectionHeight = self.$sections.eq(sectionID).children('.body').height() + extra;
                 }
-                console.log(relativeOffset, sectionHeight);
-                return self.scrollTo(relativeOffset - (self.visibleHeight - sectionHeight));
 
+                return self.scrollTo(relativeOffset - (self.visibleHeight - sectionHeight));
             }
         });
 
@@ -202,12 +201,11 @@
 
         //5.) Watch the sidebar for any DOM changes which may effect the height - then
         //    recalculate absolute positions
-        var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-        var myObserver = new MutationObserver(mutationHandler);
+        var MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
+            observer = new MutationObserver(mutationHandler);
 
-        //--- Add a target node to the observer. Can only add one node at a time.
         this.$scrollPane.each(function() {
-            myObserver.observe(this, {
+            observer.observe(this, {
                 childList: true,
                 characterData: true,
                 attributes: true,
@@ -216,8 +214,6 @@
         });
 
         function mutationHandler(mutationRecords) {
-            console.info("mutationHandler:");
-
             mutationRecords.forEach(function(mutation) {
                 if (typeof mutation.removedNodes === "object") {
                     /*var mutatedNodes = $(mutation.removedNodes);
@@ -247,6 +243,7 @@
             .promise()
             .done(function() {});
     };
+
     /**
      * updateWindowHeight - Updates visibleHeight with new browser height.
      * @param  {integer} newHeight

@@ -1,7 +1,7 @@
 Scrolly.js
 ==========
 
-A jQuery plugin for making scrollable containers with headers that snap into place.
+A jQuery plugin for making scrollable containers with headers that snap into place - and is entirely free of dependencies, besides jQuery of course.
 
 ###############
 ### Picture ###
@@ -46,7 +46,7 @@ Run the initalization method once the DOM is ready.
 	  - `h3.content-header` - Header
 	  - `div.body` - main content
 
-This skeleton structure is required - within body you are able to do whatever you would like.
+This skeleton structure is required - within `div.body` you are able to do whatever you would like.
 
 [In a future release this will be simplified scroll-pane could be automatically added by the plugin to simplify the base javascript.]
 
@@ -68,3 +68,5 @@ $('#example').Scrolly({
 - Doesn't play 100% nice with pageUp/pageDown, it pages too much content at once to be useful.
   - Bind the keypress event and intercept those keys. Instead move up or down just one section of content.
 - Pressing the Home key from the bottom results in the list being displayed out of order. Scrolling through corrects in automatically. I haven't looked into why this occurs.
+- Small issue with appending elements. It works fine everywhere except the final section OUTSIDE of div.body. The height for the final section is calculated from the body.
+  - To fix just change it to calculate the height from all children - :after won't be a child.

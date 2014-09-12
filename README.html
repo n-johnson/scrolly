@@ -791,7 +791,7 @@ body .markdown-body
 </style><title>README</title></head><body><article class="markdown-body"><h1>
 <a name="user-content-scrollyjs" class="anchor" href="#scrollyjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scrolly.js</h1>
 
-<p>A jQuery plugin for making scrollable containers with headers that snap into place.</p>
+<p>A jQuery plugin for making scrollable containers with headers that snap into place - and is entirely free of dependencies, besides jQuery of course.</p>
 
 <h3>
 <a name="user-content-picture" class="anchor" href="#picture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Picture</h3>
@@ -852,7 +852,7 @@ body .markdown-body
 </li>
 </ul>
 </li>
-</ul><p>This skeleton structure is required - within body you are able to do whatever you would like.</p>
+</ul><p>This skeleton structure is required - within <code>div.body</code> you are able to do whatever you would like.</p>
 
 <p>[In a future release this will be simplified scroll-pane could be automatically added by the plugin to simplify the base javascript.]</p>
 
@@ -882,4 +882,10 @@ body .markdown-body
 </ul>
 </li>
 <li>Pressing the Home key from the bottom results in the list being displayed out of order. Scrolling through corrects in automatically. I haven't looked into why this occurs.</li>
+<li>Small issue with appending elements. It works fine everywhere except the final section OUTSIDE of div.body. The height for the final section is calculated from the body.
+
+<ul>
+<li>To fix just change it to calculate the height from all children - :after won't be a child.</li>
+</ul>
+</li>
 </ul></article></body></html>
